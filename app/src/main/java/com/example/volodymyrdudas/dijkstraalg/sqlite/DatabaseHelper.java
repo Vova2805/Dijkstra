@@ -1,5 +1,6 @@
 package com.example.volodymyrdudas.dijkstraalg.sqlite;
 
+import android.content.ContentValues;
 import android.content.Context;
 import android.database.DatabaseErrorHandler;
 import android.database.sqlite.SQLiteDatabase;
@@ -27,6 +28,11 @@ public class DatabaseHelper extends SQLiteOpenHelper implements BaseColumns {
     public void onCreate(SQLiteDatabase db) {
         db.execSQL(ConfigParams.NODE_TABLE_CREATE_SCRIPT);
         db.execSQL(ConfigParams.EDGE_TABLE_CREATE_SCRIPT);
+        db.execSQL(ConfigParams.TRIGGER_TABLE_CREATE_SCRIPT);
+        ContentValues values = new ContentValues();
+        values.put(ConfigParams.TRIGGERED_COLUMN, "TRUE");
+        db.insert(ConfigParams.TRIGGER_TABLE, null, values);
+        db.execSQL(ConfigParams.DIJKSTRA_SCRIPT);
     }
 
     @Override
