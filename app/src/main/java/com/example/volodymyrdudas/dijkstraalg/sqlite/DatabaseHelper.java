@@ -2,6 +2,7 @@ package com.example.volodymyrdudas.dijkstraalg.sqlite;
 
 import android.content.ContentValues;
 import android.content.Context;
+import android.database.Cursor;
 import android.database.DatabaseErrorHandler;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
@@ -26,13 +27,27 @@ public class DatabaseHelper extends SQLiteOpenHelper implements BaseColumns {
 
     @Override
     public void onCreate(SQLiteDatabase db) {
-        db.execSQL(ConfigParams.NODE_TABLE_CREATE_SCRIPT);
-        db.execSQL(ConfigParams.EDGE_TABLE_CREATE_SCRIPT);
-        db.execSQL(ConfigParams.TRIGGER_TABLE_CREATE_SCRIPT);
+        db.execSQL(ConfigParams.CITY_CREATE_TABLE_SCRIPT);
+        db.execSQL(ConfigParams.ROAD_CREATE_TABLE_SCRIPT);
+        db.execSQL(ConfigParams.INSERT_DATA_SCRIPT);
+        db.execSQL(ConfigParams.INSERT_DATA_SCRIPT1);
         ContentValues values = new ContentValues();
-        values.put(ConfigParams.TRIGGERED_COLUMN, "TRUE");
-        db.insert(ConfigParams.TRIGGER_TABLE, null, values);
-        db.execSQL(ConfigParams.DIJKSTRA_SCRIPT);
+        Cursor cursor = db.rawQuery("SELECT * FROM City", null);
+        cursor.moveToFirst();
+        while (!cursor.isAfterLast()) {
+            System.out.println(cursor.getString(cursor.getColumnIndex("CityId")) + " " +
+                    cursor.getString(cursor.getColumnIndex("Name")));
+            cursor.moveToNext();
+        }
+        cursor = db.rawQuery("SELECT * FROM Road", null);
+        cursor.moveToFirst();
+        while (!cursor.isAfterLast()) {
+            System.out.println(cursor.getString(cursor.getColumnIndex("RoadId")) + " " +
+                    cursor.getString(cursor.getColumnIndex("FromCity")) + " " +
+                    cursor.getString(cursor.getColumnIndex("ToCity")) + " " +
+                    cursor.getString(cursor.getColumnIndex("Distance")));
+            cursor.moveToNext();
+        }
     }
 
     @Override
@@ -42,3 +57,9 @@ public class DatabaseHelper extends SQLiteOpenHelper implements BaseColumns {
         onCreate(db);
     }
 }
+/*
+Script for generating the test data inserts.
+
+SELECT 'INSERT INTO dbo.[City] VALUES (' + CAST(CityID AS Varchar(MAX)) + ', ''' + Name + ''')' FROM City
+SELECT 'INSERT INTO dbo.[Road] VALUES (' + CAST(FromCity AS Varchar(MAX)) + ', ' + CAST(ToCity AS Varchar(MAX)) + ', ' + CAST(Distance AS Varchar(MAX)) + ')' FROM Road
+*/
