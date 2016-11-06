@@ -56,17 +56,6 @@
         android:textAppearance="?android:attr/textAppearanceLarge"
         android:textSize="15sp" />
 
-    <TextView
-        android:id="@+id/javaResultTextView"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_above="@+id/button2"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true"
-        android:text="@string/elapsed_time_is"
-        android:textAppearance="?android:attr/textAppearanceLarge"
-        android:textSize="15sp" />
-
     <Button
         android:id="@+id/button1"
         android:layout_width="match_parent"
@@ -87,7 +76,7 @@
         android:layout_alignParentTop="true"
         android:ems="10"
         android:inputType="numberSigned"
-        android:text="@string/_1000" />
+        android:text="@string/_100" />
 
     <Button
         android:id="@+id/button0"
@@ -99,4 +88,15 @@
         android:layout_marginTop="50dp"
         android:onClick="onClickGenerate"
         android:text="@string/generate" />
+
+    <TextView
+        android:id="@+id/javaResultTextView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/button2"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:text="@string/elapsed_time_is"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:textSize="15sp" />
 </RelativeLayout>

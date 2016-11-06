@@ -17,6 +17,13 @@ public class DatabaseHelper extends OrmLiteSqliteOpenHelper {
 
     private static final String DATABASE_NAME = "dijkstra.db";
     private static final int DATABASE_VERSION = 1;
+    public RuntimeExceptionDao<City, Integer> cityDAO;
+    public RuntimeExceptionDao<Road, Integer> roadDAO;
+
+    {
+        cityDAO = getRuntimeExceptionDao(City.class);
+        roadDAO = getRuntimeExceptionDao(Road.class);
+    }
 
     public DatabaseHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
@@ -32,8 +39,6 @@ public class DatabaseHelper extends OrmLiteSqliteOpenHelper {
             Log.e(DatabaseHelper.class.getName(), "Can't create database", e);
             throw new RuntimeException(e);
         }
-        RuntimeExceptionDao<City, Integer> cityDAO = getRuntimeExceptionDao(City.class);
-        RuntimeExceptionDao<Road, Integer> roadDAO = getRuntimeExceptionDao(Road.class);
         Log.i(DatabaseHelper.class.getName(), "created new entries in onCreate: " + System.currentTimeMillis());
     }
 

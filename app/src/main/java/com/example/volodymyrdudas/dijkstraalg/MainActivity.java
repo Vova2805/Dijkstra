@@ -14,6 +14,14 @@ import com.example.volodymyrdudas.dijkstraalg.db.DatabaseHelper;
 import com.example.volodymyrdudas.dijkstraalg.generator.Generator;
 import com.example.volodymyrdudas.dijkstraalg.javaimpl.impl.DijkstraAlgorithm;
 import com.example.volodymyrdudas.dijkstraalg.javaimpl.model.Graph;
+import com.example.volodymyrdudas.dijkstraalg.model.City;
+import com.example.volodymyrdudas.dijkstraalg.model.Road;
+import com.j256.ormlite.stmt.PreparedQuery;
+import com.j256.ormlite.stmt.QueryBuilder;
+
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
     private int currentDBContentCountCities = 0;
@@ -105,24 +113,43 @@ public class MainActivity extends AppCompatActivity {
                 Generator.generate(mSqLiteDatabase, generateCount - currentDBContentCountCities);
             }
         }
-        Toast toast = Toast.makeText(getApplicationContext(), "Generated", Toast.LENGTH_SHORT);
-        toast.setGravity(Gravity.TOP | Gravity.CENTER_HORIZONTAL, 0, 0);
-        toast.show();
+        showToast("Generated");
         updateCount();
     }
 
     public void onClickJava(View view) {
+        List<City> cities = new ArrayList<>();
+        List<Road> roads = new ArrayList<>();
+        try {
+            QueryBuilder<City, Integer> queryBuilder = mDatabaseHelper.cityDAO.queryBuilder();
+            queryBuilder.orderBy(ConfigParams.CITY_TABLE_ID, true);
+            PreparedQuery<City> preparedQuery = queryBuilder.prepare();
+            cities = mDatabaseHelper.cityDAO.query(preparedQuery);
+            QueryBuilder<Road, Integer> queryBuilderRoad = mDatabaseHelper.roadDAO.queryBuilder();
+            PreparedQuery<Road> preparedQueryRoad = queryBuilderRoad.prepare();
+            roads = mDatabaseHelper.roadDAO.query(preparedQueryRoad);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
         TextView infoTextView = (TextView) findViewById(R.id.javaResultTextView);
-        Graph graph = new Graph(null, null);
+        Graph graph = new Graph(cities, roads);
         DijkstraAlgorithm dijkstraAlgorithm = new DijkstraAlgorithm(graph);
-        long time = dijkstraAlgorithm.execute(null);
-        infoTextView.setText("Elapsed time is : " + String.valueOf(time / 1000.0) + " sec");
+        if (cities.size() > 0) {
+            long time = dijkstraAlgorithm.execute(cities.get(0));
+            infoTextView.setText("Elapsed time is : " + String.valueOf(time / 1000.0) + " sec");
+        } else {
+            showToast("There is no city in the db");
+        }
     }
 
     public void onClickSQL(View view) {
-        TextView infoTextView = (TextView) findViewById(R.id.SQLResultTextView);
-        long time = dijkstraAlgSQL();
-        infoTextView.setText("Elapsed time is : " + String.valueOf(time / 1000.0) + " sec");
+        if (currentDBContentCountCities > 0) {
+            TextView infoTextView = (TextView) findViewById(R.id.SQLResultTextView);
+            long time = dijkstraAlgSQL();
+            infoTextView.setText("Elapsed time is : " + String.valueOf(time / 1000.0) + " sec");
+        } else {
+            showToast("There is no city in the db");
+        }
     }
 
     private void updateCount() {
@@ -133,5 +160,11 @@ public class MainActivity extends AppCompatActivity {
         TextView infoTextView = (TextView) findViewById(R.id.infoTextView);
         infoTextView.setText("Current db amount : Cities - " + String.valueOf(currentDBContentCountCities) + " Roads - " + String.valueOf(currentDBContentCountRoads));
         cursor.close();
+    }
+
+    private void showToast(String text) {
+        Toast toast = Toast.makeText(getApplicationContext(), text, Toast.LENGTH_SHORT);
+        toast.setGravity(Gravity.CENTER_VERTICAL | Gravity.CENTER_HORIZONTAL, 0, 0);
+        toast.show();
     }
 }

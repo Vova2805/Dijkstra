@@ -5,6 +5,6 @@
     <string name="generate">Generate</string>
     <string name="amount">Amount</string>
     <string name="current_db_amount">Current db amount :</string>
-    <string name="_1000">1000</string>
+    <string name="_100">100</string>
     <string name="elapsed_time_is">Elapsed time is :</string>
 </resources>
