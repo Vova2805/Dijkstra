@@ -12,10 +12,11 @@ import android.widget.Toast;
 import com.example.volodymyrdudas.dijkstraalg.config.ConfigParams;
 import com.example.volodymyrdudas.dijkstraalg.db.DatabaseHelper;
 import com.example.volodymyrdudas.dijkstraalg.generator.Generator;
-import com.example.volodymyrdudas.dijkstraalg.javaimpl.impl.DijkstraAlgorithm;
-import com.example.volodymyrdudas.dijkstraalg.javaimpl.model.Graph;
+import com.example.volodymyrdudas.dijkstraalg.javaimpl.DijkstraAlgorithmJava;
 import com.example.volodymyrdudas.dijkstraalg.model.City;
+import com.example.volodymyrdudas.dijkstraalg.model.Graph;
 import com.example.volodymyrdudas.dijkstraalg.model.Road;
+import com.example.volodymyrdudas.dijkstraalg.sqlimpl.DijkstraAlgorithmSQL;
 import com.j256.ormlite.stmt.PreparedQuery;
 import com.j256.ormlite.stmt.QueryBuilder;
 
@@ -36,69 +37,6 @@ public class MainActivity extends AppCompatActivity {
         mDatabaseHelper = new DatabaseHelper(this);
         mSqLiteDatabase = mDatabaseHelper.getWritableDatabase();
         updateCount();
-    }
-
-    private long dijkstraAlgSQL() {
-        int startSity = 1;
-        long startTime = System.currentTimeMillis();
-        mSqLiteDatabase.beginTransaction();
-        mSqLiteDatabase.execSQL("CREATE TABLE CityList" +
-                "(" +
-                "CityId INTEGER NOT NULL," +
-                "Estimate INTEGER NOT NULL," +
-                "Predecessor INTEGER NULL," +
-                "Done BIT NOT NULL" +
-                ")");
-        mSqLiteDatabase.execSQL("INSERT INTO CityList (CityId, Estimate, Predecessor, Done)" +
-                "SELECT CityId, 2147483647, NULL, 0 FROM City");
-        Cursor cursor;
-        mSqLiteDatabase.execSQL("UPDATE CityList SET Estimate = 0 WHERE CityID = " + startSity);
-
-        Integer fromCity;
-        int currentEstimate = 0;
-        while (true) {
-            fromCity = null;
-            cursor = mSqLiteDatabase.rawQuery("SELECT CityId, Estimate FROM CityList WHERE Done = 0 AND Estimate < 2147483647 ORDER BY Estimate LIMIT 1;", null);
-            if (cursor.moveToFirst()) {
-                fromCity = cursor.getInt(cursor.getColumnIndex("CityId"));
-                currentEstimate = cursor.getInt(cursor.getColumnIndex("Estimate"));
-            }
-            if (fromCity == null) {
-                break;
-            }
-            mSqLiteDatabase.execSQL("UPDATE CityList SET Done = 1 WHERE CityId = " + fromCity);
-            mSqLiteDatabase.execSQL("UPDATE CityList SET Estimate = " + currentEstimate + " + (SELECT Distance FROM Road WHERE ToCity = CityId)," +
-                    " Predecessor = " + fromCity +
-                    " WHERE CityId IN (SELECT ToCity FROM Road " +
-                    " WHERE FromCity = " + fromCity + " AND (" + currentEstimate + " + Distance) < Estimate)");
-            cursor.close();
-//            cursor = mSqLiteDatabase.rawQuery("SELECT * FROM CityList", null);
-//            if (cursor != null && cursor.moveToFirst()) {
-//                try {
-//                    while (!cursor.isAfterLast()) {
-//                        System.out.println(cursor.getString(cursor.getColumnIndex("CityId")) + " " +
-//                                cursor.getString(cursor.getColumnIndex("Estimate")) + " " +
-//                                cursor.getString(cursor.getColumnIndex("Predecessor")) + " " +
-//                                cursor.getString(cursor.getColumnIndex("Done")));
-//                        cursor.moveToNext();
-//                    }
-//                } catch (Exception e) {
-//                    System.out.println("ERROR");
-//                }
-//            }
-        }
-        cursor = mSqLiteDatabase.rawQuery("SELECT * FROM CityList", null);
-        cursor.moveToFirst();
-        while (!cursor.isAfterLast()) {
-            System.out.println(cursor.getString(cursor.getColumnIndex("CityId")) + " " +
-                    cursor.getString(cursor.getColumnIndex("Estimate")) + " " +
-                    cursor.getString(cursor.getColumnIndex("Predecessor")));
-            cursor.moveToNext();
-        }
-        cursor.close();
-        mSqLiteDatabase.execSQL("DROP TABLE CityList");
-        mSqLiteDatabase.endTransaction();
-        return System.currentTimeMillis() - startTime;
     }
 
     public void onClickGenerate(View view) {
@@ -133,9 +71,9 @@ public class MainActivity extends AppCompatActivity {
         }
         TextView infoTextView = (TextView) findViewById(R.id.javaResultTextView);
         Graph graph = new Graph(cities, roads);
-        DijkstraAlgorithm dijkstraAlgorithm = new DijkstraAlgorithm(graph);
+        DijkstraAlgorithmJava dijkstraAlgorithmJava = new DijkstraAlgorithmJava(graph);
         if (cities.size() > 0) {
-            long time = dijkstraAlgorithm.execute(cities.get(0));
+            long time = dijkstraAlgorithmJava.execute(cities.get(0));
             infoTextView.setText("Elapsed time is : " + String.valueOf(time / 1000.0) + " sec");
         } else {
             showToast("There is no city in the db");
@@ -145,7 +83,8 @@ public class MainActivity extends AppCompatActivity {
     public void onClickSQL(View view) {
         if (currentDBContentCountCities > 0) {
             TextView infoTextView = (TextView) findViewById(R.id.SQLResultTextView);
-            long time = dijkstraAlgSQL();
+            DijkstraAlgorithmSQL dijkstraAlgorithmSQL = new DijkstraAlgorithmSQL(mSqLiteDatabase);
+            long time = dijkstraAlgorithmSQL.execute(1);
             infoTextView.setText("Elapsed time is : " + String.valueOf(time / 1000.0) + " sec");
         } else {
             showToast("There is no city in the db");

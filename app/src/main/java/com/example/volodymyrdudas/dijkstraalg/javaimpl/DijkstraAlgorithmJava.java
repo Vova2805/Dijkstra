@@ -1,7 +1,7 @@
-package com.example.volodymyrdudas.dijkstraalg.javaimpl.impl;
+package com.example.volodymyrdudas.dijkstraalg.javaimpl;
 
-import com.example.volodymyrdudas.dijkstraalg.javaimpl.model.Graph;
 import com.example.volodymyrdudas.dijkstraalg.model.City;
+import com.example.volodymyrdudas.dijkstraalg.model.Graph;
 import com.example.volodymyrdudas.dijkstraalg.model.Road;
 
 import java.util.ArrayList;
@@ -13,7 +13,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-public class DijkstraAlgorithm {
+public class DijkstraAlgorithmJava {
     private final List<City> cities;
     private final List<Road> roads;
     private Set<City> settledNodes;
@@ -21,7 +21,7 @@ public class DijkstraAlgorithm {
     private Map<City, City> predecessors;
     private Map<City, Double> distance;
 
-    public DijkstraAlgorithm(Graph graph) {
+    public DijkstraAlgorithmJava(Graph graph) {
         this.cities = new ArrayList<City>(graph.getCities());
         this.roads = new ArrayList<Road>(graph.getRoads());
     }

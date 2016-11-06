@@ -1,7 +1,4 @@
-package com.example.volodymyrdudas.dijkstraalg.javaimpl.model;
-
-import com.example.volodymyrdudas.dijkstraalg.model.City;
-import com.example.volodymyrdudas.dijkstraalg.model.Road;
+package com.example.volodymyrdudas.dijkstraalg.model;
 
 import java.util.List;
 
