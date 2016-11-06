@@ -1,6 +1,8 @@
 package com.example.volodymyrdudas.dijkstraalg.javaimpl.impl;
 
-import com.example.volodymyrdudas.dijkstraalg.javaimpl.model.*;
+import com.example.volodymyrdudas.dijkstraalg.javaimpl.model.Graph;
+import com.example.volodymyrdudas.dijkstraalg.model.City;
+import com.example.volodymyrdudas.dijkstraalg.model.Road;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -12,38 +14,38 @@ import java.util.Map;
 import java.util.Set;
 
 public class DijkstraAlgorithm {
-
-    private final List<Vertex> nodes;
-    private final List<Edge> edges;
-    private Set<Vertex> settledNodes;
-    private Set<Vertex> unSettledNodes;
-    private Map<Vertex, Vertex> predecessors;
-    private Map<Vertex, Integer> distance;
+    private final List<City> cities;
+    private final List<Road> roads;
+    private Set<City> settledNodes;
+    private Set<City> unSettledNodes;
+    private Map<City, City> predecessors;
+    private Map<City, Double> distance;
 
     public DijkstraAlgorithm(Graph graph) {
-        // create a copy of the array so that we can operate on this array
-        this.nodes = new ArrayList<Vertex>(graph.getVertexes());
-        this.edges = new ArrayList<Edge>(graph.getEdges());
+        this.cities = new ArrayList<City>(graph.getCities());
+        this.roads = new ArrayList<Road>(graph.getRoads());
     }
 
-    public void execute(Vertex source) {
-        settledNodes = new HashSet<Vertex>();
-        unSettledNodes = new HashSet<Vertex>();
-        distance = new HashMap<Vertex, Integer>();
-        predecessors = new HashMap<Vertex, Vertex>();
-        distance.put(source, 0);
+    public long execute(City source) {
+        long startTime = System.currentTimeMillis();
+        settledNodes = new HashSet<City>();
+        unSettledNodes = new HashSet<City>();
+        distance = new HashMap<City, Double>();
+        predecessors = new HashMap<City, City>();
+        distance.put(source, 0.0);
         unSettledNodes.add(source);
         while (unSettledNodes.size() > 0) {
-            Vertex node = getMinimum(unSettledNodes);
+            City node = getMinimum(unSettledNodes);
             settledNodes.add(node);
             unSettledNodes.remove(node);
             findMinimalDistances(node);
         }
+        return System.currentTimeMillis() - startTime;
     }
 
-    private void findMinimalDistances(Vertex node) {
-        List<Vertex> adjacentNodes = getNeighbors(node);
-        for (Vertex target : adjacentNodes) {
+    private void findMinimalDistances(City node) {
+        List<City> adjacentNodes = getNeighbors(node);
+        for (City target : adjacentNodes) {
             if (getShortestDistance(target) > getShortestDistance(node)
                     + getDistance(node, target)) {
                 distance.put(target, getShortestDistance(node)
@@ -52,33 +54,32 @@ public class DijkstraAlgorithm {
                 unSettledNodes.add(target);
             }
         }
-
     }
 
-    private int getDistance(Vertex node, Vertex target) {
-        for (Edge edge : edges) {
-            if (edge.getSource().equals(node)
-                    && edge.getDestination().equals(target)) {
-                return edge.getWeight();
+    private double getDistance(City node, City target) {
+        for (Road edge : roads) {
+            if (edge.getFromCity().equals(node)
+                    && edge.getToCity().equals(target)) {
+                return edge.getDistance();
             }
         }
         throw new RuntimeException("Should not happen");
     }
 
-    private List<Vertex> getNeighbors(Vertex node) {
-        List<Vertex> neighbors = new ArrayList<Vertex>();
-        for (Edge edge : edges) {
-            if (edge.getSource().equals(node)
-                    && !isSettled(edge.getDestination())) {
-                neighbors.add(edge.getDestination());
+    private List<City> getNeighbors(City node) {
+        List<City> neighbors = new ArrayList<City>();
+        for (Road edge : roads) {
+            if (edge.getFromCity().equals(node)
+                    && !isSettled(edge.getToCity())) {
+                neighbors.add(edge.getToCity());
             }
         }
         return neighbors;
     }
 
-    private Vertex getMinimum(Set<Vertex> vertexes) {
-        Vertex minimum = null;
-        for (Vertex vertex : vertexes) {
+    private City getMinimum(Set<City> vertexes) {
+        City minimum = null;
+        for (City vertex : vertexes) {
             if (minimum == null) {
                 minimum = vertex;
             } else {
@@ -90,12 +91,12 @@ public class DijkstraAlgorithm {
         return minimum;
     }
 
-    private boolean isSettled(Vertex vertex) {
+    private boolean isSettled(City vertex) {
         return settledNodes.contains(vertex);
     }
 
-    private int getShortestDistance(Vertex destination) {
-        Integer d = distance.get(destination);
+    private double getShortestDistance(City destination) {
+        Double d = distance.get(destination);
         if (d == null) {
             return Integer.MAX_VALUE;
         } else {
@@ -103,14 +104,9 @@ public class DijkstraAlgorithm {
         }
     }
 
-    /*
-     * This method returns the path from the source to the selected target and
-     * NULL if no path exists
-     */
-    public LinkedList<Vertex> getPath(Vertex target) {
-        LinkedList<Vertex> path = new LinkedList<Vertex>();
-        Vertex step = target;
-        // check if a path exists
+    public LinkedList<City> getPath(City target) {
+        LinkedList<City> path = new LinkedList<City>();
+        City step = target;
         if (predecessors.get(step) == null) {
             return null;
         }
@@ -119,7 +115,6 @@ public class DijkstraAlgorithm {
             step = predecessors.get(step);
             path.add(step);
         }
-        // Put it into the correct order
         Collections.reverse(path);
         return path;
     }

@@ -4,12 +4,20 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.view.Gravity;
 import android.view.View;
 import android.widget.TextView;
+import android.widget.Toast;
 
-import com.example.volodymyrdudas.dijkstraalg.sqlite.DatabaseHelper;
+import com.example.volodymyrdudas.dijkstraalg.config.ConfigParams;
+import com.example.volodymyrdudas.dijkstraalg.db.DatabaseHelper;
+import com.example.volodymyrdudas.dijkstraalg.generator.Generator;
+import com.example.volodymyrdudas.dijkstraalg.javaimpl.impl.DijkstraAlgorithm;
+import com.example.volodymyrdudas.dijkstraalg.javaimpl.model.Graph;
 
 public class MainActivity extends AppCompatActivity {
+    private int currentDBContentCountCities = 0;
+    private int currentDBContentCountRoads = 0;
     private DatabaseHelper mDatabaseHelper;
     private SQLiteDatabase mSqLiteDatabase;
 
@@ -19,17 +27,12 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         mDatabaseHelper = new DatabaseHelper(this);
         mSqLiteDatabase = mDatabaseHelper.getWritableDatabase();
+        updateCount();
     }
 
-    public void onClick(View view) {
-        int quantity = -1;
-        dijkstraAlgSQL();
-        TextView infoTextView = (TextView) findViewById(R.id.textView);
-        infoTextView.setText("");
-    }
-
-    private void dijkstraAlgSQL() {
+    private long dijkstraAlgSQL() {
         int startSity = 1;
+        long startTime = System.currentTimeMillis();
         mSqLiteDatabase.beginTransaction();
         mSqLiteDatabase.execSQL("CREATE TABLE CityList" +
                 "(" +
@@ -61,20 +64,20 @@ public class MainActivity extends AppCompatActivity {
                     " WHERE CityId IN (SELECT ToCity FROM Road " +
                     " WHERE FromCity = " + fromCity + " AND (" + currentEstimate + " + Distance) < Estimate)");
             cursor.close();
-            cursor = mSqLiteDatabase.rawQuery("SELECT * FROM CityList", null);
-            if (cursor != null && cursor.moveToFirst()) {
-                try {
-                    while (!cursor.isAfterLast()) {
-                        System.out.println(cursor.getString(cursor.getColumnIndex("CityId")) + " " +
-                                cursor.getString(cursor.getColumnIndex("Estimate")) + " " +
-                                cursor.getString(cursor.getColumnIndex("Predecessor")) + " " +
-                                cursor.getString(cursor.getColumnIndex("Done")));
-                        cursor.moveToNext();
-                    }
-                } catch (Exception e) {
-                    System.out.println("ERRRO");
-                }
-            }
+//            cursor = mSqLiteDatabase.rawQuery("SELECT * FROM CityList", null);
+//            if (cursor != null && cursor.moveToFirst()) {
+//                try {
+//                    while (!cursor.isAfterLast()) {
+//                        System.out.println(cursor.getString(cursor.getColumnIndex("CityId")) + " " +
+//                                cursor.getString(cursor.getColumnIndex("Estimate")) + " " +
+//                                cursor.getString(cursor.getColumnIndex("Predecessor")) + " " +
+//                                cursor.getString(cursor.getColumnIndex("Done")));
+//                        cursor.moveToNext();
+//                    }
+//                } catch (Exception e) {
+//                    System.out.println("ERROR");
+//                }
+//            }
         }
         cursor = mSqLiteDatabase.rawQuery("SELECT * FROM CityList", null);
         cursor.moveToFirst();
@@ -87,5 +90,48 @@ public class MainActivity extends AppCompatActivity {
         cursor.close();
         mSqLiteDatabase.execSQL("DROP TABLE CityList");
         mSqLiteDatabase.endTransaction();
+        return System.currentTimeMillis() - startTime;
+    }
+
+    public void onClickGenerate(View view) {
+        TextView quantityTextView = (TextView) findViewById(R.id.quantityTextView);
+        Integer generateCount = Integer.parseInt(quantityTextView.getText().toString());
+        if (generateCount != null) {
+            if (currentDBContentCountCities > generateCount) {
+                mSqLiteDatabase.execSQL("DELETE FROM City;");
+                mSqLiteDatabase.execSQL("DELETE FROM Road;");
+                Generator.generate(mSqLiteDatabase, generateCount);
+            } else if (currentDBContentCountCities < generateCount) {
+                Generator.generate(mSqLiteDatabase, generateCount - currentDBContentCountCities);
+            }
+        }
+        Toast toast = Toast.makeText(getApplicationContext(), "Generated", Toast.LENGTH_SHORT);
+        toast.setGravity(Gravity.TOP | Gravity.CENTER_HORIZONTAL, 0, 0);
+        toast.show();
+        updateCount();
+    }
+
+    public void onClickJava(View view) {
+        TextView infoTextView = (TextView) findViewById(R.id.javaResultTextView);
+        Graph graph = new Graph(null, null);
+        DijkstraAlgorithm dijkstraAlgorithm = new DijkstraAlgorithm(graph);
+        long time = dijkstraAlgorithm.execute(null);
+        infoTextView.setText("Elapsed time is : " + String.valueOf(time / 1000.0) + " sec");
+    }
+
+    public void onClickSQL(View view) {
+        TextView infoTextView = (TextView) findViewById(R.id.SQLResultTextView);
+        long time = dijkstraAlgSQL();
+        infoTextView.setText("Elapsed time is : " + String.valueOf(time / 1000.0) + " sec");
+    }
+
+    private void updateCount() {
+        Cursor cursor = mSqLiteDatabase.rawQuery("SELECT * FROM " + ConfigParams.CITY_TABLE, null);
+        currentDBContentCountCities = cursor.getCount();
+        cursor = mSqLiteDatabase.rawQuery("SELECT * FROM " + ConfigParams.ROAD_TABLE, null);
+        currentDBContentCountRoads = cursor.getCount();
+        TextView infoTextView = (TextView) findViewById(R.id.infoTextView);
+        infoTextView.setText("Current db amount : Cities - " + String.valueOf(currentDBContentCountCities) + " Roads - " + String.valueOf(currentDBContentCountRoads));
+        cursor.close();
     }
 }

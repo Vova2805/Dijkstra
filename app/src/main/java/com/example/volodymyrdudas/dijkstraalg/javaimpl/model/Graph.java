@@ -1,21 +1,24 @@
 package com.example.volodymyrdudas.dijkstraalg.javaimpl.model;
 
+import com.example.volodymyrdudas.dijkstraalg.model.City;
+import com.example.volodymyrdudas.dijkstraalg.model.Road;
+
 import java.util.List;
 
 public class Graph {
-    private final List<Vertex> vertexes;
-    private final List<Edge> edges;
+    private final List<City> cities;
+    private final List<Road> roads;
 
-    public Graph(List<Vertex> vertexes, List<Edge> edges) {
-        this.vertexes = vertexes;
-        this.edges = edges;
+    public Graph(List<City> cities, List<Road> roads) {
+        this.cities = cities;
+        this.roads = roads;
     }
 
-    public List<Vertex> getVertexes() {
-        return vertexes;
+    public List<City> getCities() {
+        return cities;
     }
 
-    public List<Edge> getEdges() {
-        return edges;
+    public List<Road> getRoads() {
+        return roads;
     }
 }
