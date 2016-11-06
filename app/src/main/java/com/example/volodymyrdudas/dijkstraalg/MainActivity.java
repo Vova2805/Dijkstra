@@ -23,16 +23,9 @@ public class MainActivity extends AppCompatActivity {
 
     public void onClick(View view) {
         int quantity = -1;
-//
-//        String[] whereArgs = new String[]{};
-//        Cursor cursor = mSqLiteDatabase.rawQuery("SELECT * FROM " + ConfigParams.TRIGGER_TABLE, whereArgs);
-//
-//        cursor.moveToFirst();
-//        quantity = cursor.getCount();
         dijkstraAlgSQL();
         TextView infoTextView = (TextView) findViewById(R.id.textView);
         infoTextView.setText("");
-//        cursor.close();
     }
 
     private void dijkstraAlgSQL() {
