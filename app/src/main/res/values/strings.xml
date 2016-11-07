@@ -1,7 +1,7 @@
 <resources>
     <string name="app_name">DijkstraAlg</string>
-    <string name="calculate_by_java_djkstra">Calculate by Java Djkstra</string>
-    <string name="calculate_by_sql_djkstra">Calculate by SQL Djkstra</string>
+    <string name="calculate_by_java_djkstra">Calculate by Java Dijkstra</string>
+    <string name="calculate_by_sql_djkstra">Calculate by SQL Dijkstra</string>
     <string name="generate">Generate</string>
     <string name="amount">Amount</string>
     <string name="current_db_amount">Current db amount :</string>

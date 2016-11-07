@@ -56,6 +56,8 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void onClickJava(View view) {
+        TextView infoTextView = (TextView) findViewById(R.id.javaResultTextView);
+        infoTextView.setText("");
         List<City> cities = new ArrayList<>();
         List<Road> roads = new ArrayList<>();
         try {
@@ -69,7 +71,7 @@ public class MainActivity extends AppCompatActivity {
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        TextView infoTextView = (TextView) findViewById(R.id.javaResultTextView);
+        infoTextView.setText("Elapsed time is : ");
         Graph graph = new Graph(cities, roads);
         DijkstraAlgorithmJava dijkstraAlgorithmJava = new DijkstraAlgorithmJava(graph);
         if (cities.size() > 0) {
@@ -78,17 +80,20 @@ public class MainActivity extends AppCompatActivity {
         } else {
             showToast("There is no city in the db");
         }
+        showToast("Calculated");
     }
 
     public void onClickSQL(View view) {
+        TextView infoTextView = (TextView) findViewById(R.id.SQLResultTextView);
+        infoTextView.setText("");
         if (currentDBContentCountCities > 0) {
-            TextView infoTextView = (TextView) findViewById(R.id.SQLResultTextView);
             DijkstraAlgorithmSQL dijkstraAlgorithmSQL = new DijkstraAlgorithmSQL(mSqLiteDatabase);
             long time = dijkstraAlgorithmSQL.execute(1);
             infoTextView.setText("Elapsed time is : " + String.valueOf(time / 1000.0) + " sec");
         } else {
             showToast("There is no city in the db");
         }
+        showToast("Calculated");
     }
 
     private void updateCount() {
