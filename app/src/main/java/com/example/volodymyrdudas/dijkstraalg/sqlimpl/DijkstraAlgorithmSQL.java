@@ -21,10 +21,9 @@ public class DijkstraAlgorithmSQL {
                 "Done BIT NOT NULL" +
                 ")");
         mSqLiteDatabase.execSQL("INSERT INTO CityList (CityId, Estimate, Predecessor, Done)" +
-                "SELECT CityId, 2147483647, NULL, 0 FROM City");
-        Cursor cursor;
+                "SELECT CityId, 2147483647, NULL, 0 FROM City;");
         mSqLiteDatabase.execSQL("UPDATE CityList SET Estimate = 0 WHERE CityID = " + startSity);
-
+        Cursor cursor;
         Integer fromCity;
         int currentEstimate = 0;
         while (true) {
@@ -37,38 +36,33 @@ public class DijkstraAlgorithmSQL {
             if (fromCity == null) {
                 break;
             }
-            mSqLiteDatabase.execSQL("UPDATE CityList SET Done = 1 WHERE CityId = " + fromCity);
-            mSqLiteDatabase.execSQL("UPDATE CityList SET Estimate = " + currentEstimate + " + (SELECT Distance FROM Road WHERE ToCity = CityId)," +
+            mSqLiteDatabase.execSQL(
+                    " UPDATE CityList SET Done = 1 WHERE CityId = " + fromCity + ";");
+            mSqLiteDatabase.execSQL(
+                    " UPDATE CityList SET Estimate = " + currentEstimate + " + " +
+                            "(SELECT Distance FROM Road WHERE ToCity = CityId and FromCity = " + fromCity + " LIMIT 1)," +
                     " Predecessor = " + fromCity +
-                    " WHERE CityId IN (SELECT ToCity FROM Road " +
-                    " WHERE FromCity = " + fromCity + " AND (" + currentEstimate + " + Distance) < Estimate)");
+                            " WHERE CityId IN " +
+                            " (SELECT ToCity FROM Road WHERE FromCity = " + fromCity + " AND (" + currentEstimate + " + Distance) < Estimate);");
             cursor.close();
-//            cursor = mSqLiteDatabase.rawQuery("SELECT * FROM CityList", null);
-//            if (cursor != null && cursor.moveToFirst()) {
-//                try {
-//                    while (!cursor.isAfterLast()) {
-//                        System.out.println(cursor.getString(cursor.getColumnIndex("CityId")) + " " +
-//                                cursor.getString(cursor.getColumnIndex("Estimate")) + " " +
-//                                cursor.getString(cursor.getColumnIndex("Predecessor")) + " " +
-//                                cursor.getString(cursor.getColumnIndex("Done")));
-//                        cursor.moveToNext();
-//                    }
-//                } catch (Exception e) {
-//                    System.out.println("ERROR");
-//                }
-//            }
         }
-        cursor = mSqLiteDatabase.rawQuery("SELECT * FROM CityList", null);
+        cursor.close();
+        mSqLiteDatabase.execSQL("DROP TABLE CityList;");
+        mSqLiteDatabase.endTransaction();
+        return System.currentTimeMillis() - startTime;
+    }
+
+    //for debugging
+    private void show() {
+        System.out.println("\n\n");
+        Cursor cursor = mSqLiteDatabase.rawQuery("SELECT * FROM CityList", null);
         cursor.moveToFirst();
         while (!cursor.isAfterLast()) {
             System.out.println(cursor.getString(cursor.getColumnIndex("CityId")) + " " +
                     cursor.getString(cursor.getColumnIndex("Estimate")) + " " +
-                    cursor.getString(cursor.getColumnIndex("Predecessor")));
+                    cursor.getString(cursor.getColumnIndex("Predecessor")) + " " +
+                    cursor.getString(cursor.getColumnIndex("Done")));
             cursor.moveToNext();
         }
-        cursor.close();
-        mSqLiteDatabase.execSQL("DROP TABLE CityList");
-        mSqLiteDatabase.endTransaction();
-        return System.currentTimeMillis() - startTime;
     }
 }

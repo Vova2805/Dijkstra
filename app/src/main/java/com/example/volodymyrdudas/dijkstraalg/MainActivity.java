@@ -12,11 +12,11 @@ import android.widget.Toast;
 import com.example.volodymyrdudas.dijkstraalg.config.ConfigParams;
 import com.example.volodymyrdudas.dijkstraalg.db.DatabaseHelper;
 import com.example.volodymyrdudas.dijkstraalg.generator.Generator;
-import com.example.volodymyrdudas.dijkstraalg.javaimpl.DijkstraAlgorithmJava;
 import com.example.volodymyrdudas.dijkstraalg.model.City;
 import com.example.volodymyrdudas.dijkstraalg.model.Graph;
 import com.example.volodymyrdudas.dijkstraalg.model.Road;
 import com.example.volodymyrdudas.dijkstraalg.sqlimpl.DijkstraAlgorithmSQL;
+import com.example.volodymyrdudas.dijkstraalg.tests.DijkstraAlgorithmJava;
 import com.j256.ormlite.stmt.PreparedQuery;
 import com.j256.ormlite.stmt.QueryBuilder;
 
@@ -41,8 +41,8 @@ public class MainActivity extends AppCompatActivity {
 
     public void onClickGenerate(View view) {
         TextView quantityTextView = (TextView) findViewById(R.id.quantityTextView);
-        Integer generateCount = Integer.parseInt(quantityTextView.getText().toString());
-        if (generateCount != null) {
+        if (quantityTextView != null) {
+            Integer generateCount = Integer.parseInt(quantityTextView.getText().toString());
             if (currentDBContentCountCities > generateCount) {
                 mSqLiteDatabase.execSQL("DELETE FROM City;");
                 mSqLiteDatabase.execSQL("DELETE FROM Road;");
@@ -50,14 +50,15 @@ public class MainActivity extends AppCompatActivity {
             } else if (currentDBContentCountCities < generateCount) {
                 Generator.generate(mSqLiteDatabase, generateCount - currentDBContentCountCities);
             }
+            showToast("Generated");
+            updateCount();
         }
-        showToast("Generated");
-        updateCount();
     }
 
     public void onClickJava(View view) {
         TextView infoTextView = (TextView) findViewById(R.id.javaResultTextView);
-        infoTextView.setText("");
+        if (infoTextView != null)
+            infoTextView.setText("");
         List<City> cities = new ArrayList<>();
         List<Road> roads = new ArrayList<>();
         try {
@@ -71,12 +72,14 @@ public class MainActivity extends AppCompatActivity {
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        infoTextView.setText("Elapsed time is : ");
+        if (infoTextView != null)
+            infoTextView.setText("Elapsed time is : ");
         Graph graph = new Graph(cities, roads);
         DijkstraAlgorithmJava dijkstraAlgorithmJava = new DijkstraAlgorithmJava(graph);
         if (cities.size() > 0) {
-            long time = dijkstraAlgorithmJava.execute(cities.get(0));
-            infoTextView.setText("Elapsed time is : " + String.valueOf(time / 1000.0) + " sec");
+            long time = dijkstraAlgorithmJava.execute(cities.get(0), false);
+            if (infoTextView != null)
+                infoTextView.setText("Elapsed time is : " + String.valueOf(time / 1000.0) + " sec");
         } else {
             showToast("There is no city in the db");
         }
@@ -85,11 +88,15 @@ public class MainActivity extends AppCompatActivity {
 
     public void onClickSQL(View view) {
         TextView infoTextView = (TextView) findViewById(R.id.SQLResultTextView);
-        infoTextView.setText("");
+        if (infoTextView != null) {
+            infoTextView.setText("");
+        }
         if (currentDBContentCountCities > 0) {
             DijkstraAlgorithmSQL dijkstraAlgorithmSQL = new DijkstraAlgorithmSQL(mSqLiteDatabase);
             long time = dijkstraAlgorithmSQL.execute(1);
-            infoTextView.setText("Elapsed time is : " + String.valueOf(time / 1000.0) + " sec");
+            if (infoTextView != null) {
+                infoTextView.setText("Elapsed time is : " + String.valueOf(time / 1000.0) + " sec");
+            }
         } else {
             showToast("There is no city in the db");
         }
@@ -102,7 +109,8 @@ public class MainActivity extends AppCompatActivity {
         cursor = mSqLiteDatabase.rawQuery("SELECT * FROM " + ConfigParams.ROAD_TABLE, null);
         currentDBContentCountRoads = cursor.getCount();
         TextView infoTextView = (TextView) findViewById(R.id.infoTextView);
-        infoTextView.setText("Current db amount : Cities - " + String.valueOf(currentDBContentCountCities) + " Roads - " + String.valueOf(currentDBContentCountRoads));
+        if (infoTextView != null)
+            infoTextView.setText("Current db amount : Cities - " + String.valueOf(currentDBContentCountCities) + " Roads - " + String.valueOf(currentDBContentCountRoads));
         cursor.close();
     }
 

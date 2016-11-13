@@ -1,4 +1,4 @@
-package com.example.volodymyrdudas.dijkstraalg.javaimpl;
+package com.example.volodymyrdudas.dijkstraalg.tests;
 
 import com.example.volodymyrdudas.dijkstraalg.model.City;
 import com.example.volodymyrdudas.dijkstraalg.model.Graph;
@@ -26,7 +26,7 @@ public class DijkstraAlgorithmJava {
         this.roads = new ArrayList<Road>(graph.getRoads());
     }
 
-    public long execute(City source) {
+    public long execute(City source, boolean directedGraph) {
         long startTime = System.currentTimeMillis();
         settledNodes = new HashSet<City>();
         unSettledNodes = new HashSet<City>();
@@ -38,13 +38,13 @@ public class DijkstraAlgorithmJava {
             City node = getMinimum(unSettledNodes);
             settledNodes.add(node);
             unSettledNodes.remove(node);
-            findMinimalDistances(node);
+            findMinimalDistances(node, directedGraph);
         }
         return System.currentTimeMillis() - startTime;
     }
 
-    private void findMinimalDistances(City node) {
-        List<City> adjacentNodes = getNeighbors(node);
+    private void findMinimalDistances(City node, boolean directedGraph) {
+        List<City> adjacentNodes = getNeighbors(node, directedGraph);
         for (City target : adjacentNodes) {
             if (getShortestDistance(target) > getShortestDistance(node)
                     + getDistance(node, target)) {
@@ -66,12 +66,14 @@ public class DijkstraAlgorithmJava {
         throw new RuntimeException("Should not happen");
     }
 
-    private List<City> getNeighbors(City node) {
-        List<City> neighbors = new ArrayList<City>();
+    private List<City> getNeighbors(City node, boolean directedGraph) {
+        List<City> neighbors = new ArrayList<>();
         for (Road edge : roads) {
-            if (edge.getFromCity().equals(node)
-                    && !isSettled(edge.getToCity())) {
-                neighbors.add(edge.getToCity());
+            if (((edge.getFromCity().equals(node)) || (!directedGraph && edge.getToCity().equals(node)))) {
+                City neighbor = edge.getFromCity().equals(node) ? edge.getToCity() : edge.getFromCity();
+                if (!isSettled(neighbor)) {
+                    neighbors.add(edge.getToCity());
+                }
             }
         }
         return neighbors;
