@@ -46,7 +46,6 @@ public class DijkstraAlgorithmSQL {
             cursor.close();
         }
         cursor.close();
-        show();
         long time = System.currentTimeMillis() - startTime;
         mSqLiteDatabase.execSQL("DROP TABLE CityList;");
         return time;
