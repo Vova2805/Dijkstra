@@ -110,7 +110,7 @@ public class ExampleInstrumentedTest {
 
     @Test
     public void JAVA_execute() throws Exception {
-        Graph graph = new Graph(cities, roads);
+        Graph graph = new Graph(cities);
         DijkstraAlgorithmJava dijkstraAlgorithmJava = new DijkstraAlgorithmJava(graph);
         long time = dijkstraAlgorithmJava.execute(cities.get(0));
         System.out.println(time);
@@ -120,6 +120,7 @@ public class ExampleInstrumentedTest {
     public void SQL_execute() throws Exception {
         mDatabaseHelper = new DatabaseHelper(appContext);
         mSqLiteDatabase = mDatabaseHelper.getWritableDatabase();
+        mSqLiteDatabase.execSQL("DROP TABLE CityList;");
         mSqLiteDatabase.execSQL("DELETE FROM City;");
         mSqLiteDatabase.execSQL("DELETE FROM Road;");
         for (City city : cities) {
