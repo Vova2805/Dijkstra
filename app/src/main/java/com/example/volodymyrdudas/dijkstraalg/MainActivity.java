@@ -60,24 +60,26 @@ public class MainActivity extends AppCompatActivity {
         if (infoTextView != null)
             infoTextView.setText("");
         List<City> cities = new ArrayList<>();
-        List<Road> roads = new ArrayList<>();
         try {
             QueryBuilder<City, Integer> queryBuilder = mDatabaseHelper.cityDAO.queryBuilder();
             queryBuilder.orderBy(ConfigParams.CITY_TABLE_ID, true);
             PreparedQuery<City> preparedQuery = queryBuilder.prepare();
             cities = mDatabaseHelper.cityDAO.query(preparedQuery);
             QueryBuilder<Road, Integer> queryBuilderRoad = mDatabaseHelper.roadDAO.queryBuilder();
-            PreparedQuery<Road> preparedQueryRoad = queryBuilderRoad.prepare();
-            roads = mDatabaseHelper.roadDAO.query(preparedQueryRoad);
+            PreparedQuery<Road> preparedQueryRoad;
+            for (City city : cities) {
+                preparedQueryRoad = queryBuilderRoad.where().eq("FromCity", city.getCityId()).or().eq("ToCity", city.getCityId()).prepare();
+                city.getRoads().addAll(mDatabaseHelper.roadDAO.query(preparedQueryRoad));
+            }
         } catch (SQLException e) {
             e.printStackTrace();
         }
         if (infoTextView != null)
             infoTextView.setText("Elapsed time is : ");
-        Graph graph = new Graph(cities, roads);
+        Graph graph = new Graph(cities);
         DijkstraAlgorithmJava dijkstraAlgorithmJava = new DijkstraAlgorithmJava(graph);
         if (cities.size() > 0) {
-            long time = dijkstraAlgorithmJava.execute(cities.get(0), false);
+            long time = dijkstraAlgorithmJava.execute(cities.get(0));
             if (infoTextView != null)
                 infoTextView.setText("Elapsed time is : " + String.valueOf(time / 1000.0) + " sec");
         } else {
@@ -116,7 +118,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void showToast(String text) {
         Toast toast = Toast.makeText(getApplicationContext(), text, Toast.LENGTH_SHORT);
-        toast.setGravity(Gravity.CENTER_VERTICAL | Gravity.CENTER_HORIZONTAL, 0, 0);
+        toast.setGravity(Gravity.TOP | Gravity.CENTER_HORIZONTAL, 0, 0);
         toast.show();
     }
 }

@@ -11,8 +11,6 @@ public class DijkstraAlgorithmSQL {
     }
 
     public long execute(int startSity) {
-        long startTime = System.currentTimeMillis();
-        mSqLiteDatabase.beginTransaction();
         mSqLiteDatabase.execSQL("CREATE TABLE CityList" +
                 "(" +
                 "CityId INTEGER NOT NULL," +
@@ -22,6 +20,7 @@ public class DijkstraAlgorithmSQL {
                 ")");
         mSqLiteDatabase.execSQL("INSERT INTO CityList (CityId, Estimate, Predecessor, Done)" +
                 "SELECT CityId, 2147483647, NULL, 0 FROM City;");
+        long startTime = System.currentTimeMillis();
         mSqLiteDatabase.execSQL("UPDATE CityList SET Estimate = 0 WHERE CityID = " + startSity);
         Cursor cursor;
         Integer fromCity;
@@ -41,15 +40,15 @@ public class DijkstraAlgorithmSQL {
             mSqLiteDatabase.execSQL(
                     " UPDATE CityList SET Estimate = " + currentEstimate + " + " +
                             "(SELECT Distance FROM Road WHERE ToCity = CityId and FromCity = " + fromCity + " LIMIT 1)," +
-                    " Predecessor = " + fromCity +
+                            " Predecessor = " + fromCity +
                             " WHERE CityId IN " +
                             " (SELECT ToCity FROM Road WHERE FromCity = " + fromCity + " AND (" + currentEstimate + " + Distance) < Estimate);");
             cursor.close();
         }
         cursor.close();
+        long time = System.currentTimeMillis() - startTime;
         mSqLiteDatabase.execSQL("DROP TABLE CityList;");
-        mSqLiteDatabase.endTransaction();
-        return System.currentTimeMillis() - startTime;
+        return time;
     }
 
     //for debugging

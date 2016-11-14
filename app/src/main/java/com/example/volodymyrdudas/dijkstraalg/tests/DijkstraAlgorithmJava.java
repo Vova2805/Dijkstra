@@ -15,7 +15,6 @@ import java.util.Set;
 
 public class DijkstraAlgorithmJava {
     private final List<City> cities;
-    private final List<Road> roads;
     private Set<City> settledNodes;
     private Set<City> unSettledNodes;
     private Map<City, City> predecessors;
@@ -23,10 +22,9 @@ public class DijkstraAlgorithmJava {
 
     public DijkstraAlgorithmJava(Graph graph) {
         this.cities = new ArrayList<City>(graph.getCities());
-        this.roads = new ArrayList<Road>(graph.getRoads());
     }
 
-    public long execute(City source, boolean directedGraph) {
+    public long execute(City source) {
         long startTime = System.currentTimeMillis();
         settledNodes = new HashSet<City>();
         unSettledNodes = new HashSet<City>();
@@ -38,13 +36,13 @@ public class DijkstraAlgorithmJava {
             City node = getMinimum(unSettledNodes);
             settledNodes.add(node);
             unSettledNodes.remove(node);
-            findMinimalDistances(node, directedGraph);
+            findMinimalDistances(node);
         }
         return System.currentTimeMillis() - startTime;
     }
 
-    private void findMinimalDistances(City node, boolean directedGraph) {
-        List<City> adjacentNodes = getNeighbors(node, directedGraph);
+    private void findMinimalDistances(City node) {
+        List<City> adjacentNodes = getNeighbors(node);
         for (City target : adjacentNodes) {
             if (getShortestDistance(target) > getShortestDistance(node)
                     + getDistance(node, target)) {
@@ -57,23 +55,20 @@ public class DijkstraAlgorithmJava {
     }
 
     private double getDistance(City node, City target) {
-        for (Road edge : roads) {
-            if (edge.getFromCity().equals(node)
-                    && edge.getToCity().equals(target)) {
-                return edge.getDistance();
+        for (Road road : node.getRoads()) {
+            if (road.getToCity().equals(target)) {
+                return road.getDistance();
             }
         }
-        throw new RuntimeException("Should not happen");
+        return Integer.MAX_VALUE;
     }
 
-    private List<City> getNeighbors(City node, boolean directedGraph) {
+    private List<City> getNeighbors(City node) {
         List<City> neighbors = new ArrayList<>();
-        for (Road edge : roads) {
-            if (((edge.getFromCity().equals(node)) || (!directedGraph && edge.getToCity().equals(node)))) {
-                City neighbor = edge.getFromCity().equals(node) ? edge.getToCity() : edge.getFromCity();
-                if (!isSettled(neighbor)) {
-                    neighbors.add(edge.getToCity());
-                }
+        for (Road road : node.getRoads()) {
+            City neighbor = road.getToCity();
+            if (!isSettled(neighbor)) {
+                neighbors.add(road.getToCity());
             }
         }
         return neighbors;

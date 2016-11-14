@@ -3,12 +3,16 @@ package com.example.volodymyrdudas.dijkstraalg.model;
 import com.j256.ormlite.field.DatabaseField;
 import com.j256.ormlite.table.DatabaseTable;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @DatabaseTable(tableName = "City")
 public class City {
     @DatabaseField(id = true, canBeNull = false, columnName = "CityId")
     private Integer cityId;
     @DatabaseField(canBeNull = false, columnName = "Name")
     private String name;
+    private List<Road> roads = new ArrayList<>();
 
     public City() {
     }
@@ -24,6 +28,14 @@ public class City {
 
     public String getName() {
         return name;
+    }
+
+    public List<Road> getRoads() {
+        return roads;
+    }
+
+    public void setRoads(List<Road> roads) {
+        this.roads = roads;
     }
 
     @Override

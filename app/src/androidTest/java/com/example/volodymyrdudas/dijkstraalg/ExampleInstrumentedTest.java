@@ -90,6 +90,10 @@ public class ExampleInstrumentedTest {
         roads.add(new Road(29, cities.get(9), cities.get(6), 40));
 
         roads.add(new Road(30, cities.get(8), cities.get(7), 50));
+        for (Road road : roads) {
+            road.getFromCity().getRoads().add(road);
+            road.getToCity().getRoads().add(road);
+        }
     }
 
     @Test
@@ -108,7 +112,7 @@ public class ExampleInstrumentedTest {
     public void JAVA_execute() throws Exception {
         Graph graph = new Graph(cities, roads);
         DijkstraAlgorithmJava dijkstraAlgorithmJava = new DijkstraAlgorithmJava(graph);
-        long time = dijkstraAlgorithmJava.execute(cities.get(0), true);
+        long time = dijkstraAlgorithmJava.execute(cities.get(0));
         System.out.println(time);
     }
 
