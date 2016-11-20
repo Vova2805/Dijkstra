@@ -75,15 +75,3 @@ public final class Generator {
     }
 }
 
-/*
-cursor = mSqLiteDatabase.rawQuery("SELECT * FROM " + ROAD_TABLE, null);
-        cursor.moveToFirst();
-        while (!cursor.isAfterLast()) {
-            System.out.println(cursor.getString(cursor.getColumnIndex(ROAD_TABLE_ID)) + " " +
-                    cursor.getString(cursor.getColumnIndex(ROAD_FROM_CITY)) + " " +
-                    cursor.getString(cursor.getColumnIndex(ROAD_TO_CITY)) + " " +
-                    cursor.getString(cursor.getColumnIndex(ROAD_DISTANCE)));
-            cursor.moveToNext();
-        }
- */
-
