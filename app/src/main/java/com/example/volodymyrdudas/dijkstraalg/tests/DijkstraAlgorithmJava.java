@@ -1,9 +1,13 @@
 package com.example.volodymyrdudas.dijkstraalg.tests;
 
+import com.example.volodymyrdudas.dijkstraalg.config.ConfigParams;
+import com.example.volodymyrdudas.dijkstraalg.db.DatabaseHelper;
 import com.example.volodymyrdudas.dijkstraalg.model.City;
-import com.example.volodymyrdudas.dijkstraalg.model.Graph;
 import com.example.volodymyrdudas.dijkstraalg.model.Road;
+import com.j256.ormlite.stmt.PreparedQuery;
+import com.j256.ormlite.stmt.QueryBuilder;
 
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -14,18 +18,31 @@ import java.util.Map;
 import java.util.Set;
 
 public class DijkstraAlgorithmJava {
-    private final List<City> cities;
     private Set<City> settledNodes;
     private Set<City> unSettledNodes;
     private Map<City, City> predecessors;
     private Map<City, Double> distance;
 
-    public DijkstraAlgorithmJava(Graph graph) {
-        this.cities = new ArrayList<City>(graph.getCities());
+    public List<City> init(DatabaseHelper mDatabaseHelper) {
+        List<City> cities = new ArrayList<>();
+        try {
+            QueryBuilder<City, Integer> queryBuilder = mDatabaseHelper.cityDAO.queryBuilder();
+            queryBuilder.orderBy(ConfigParams.CITY_TABLE_ID, true);
+            PreparedQuery<City> preparedQuery = queryBuilder.prepare();
+            cities = mDatabaseHelper.cityDAO.query(preparedQuery);
+            QueryBuilder<Road, Integer> queryBuilderRoad = mDatabaseHelper.roadDAO.queryBuilder();
+            PreparedQuery<Road> preparedQueryRoad;
+            for (City city : cities) {
+                preparedQueryRoad = queryBuilderRoad.where().eq("FromCity", city.getCityId()).or().eq("ToCity", city.getCityId()).prepare();
+                city.getRoads().addAll(mDatabaseHelper.roadDAO.query(preparedQueryRoad));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return cities;
     }
 
-    public long execute(City source) {
-        long startTime = System.currentTimeMillis();
+    public void execute(City source) {
         settledNodes = new HashSet<City>();
         unSettledNodes = new HashSet<City>();
         distance = new HashMap<City, Double>();
@@ -38,7 +55,6 @@ public class DijkstraAlgorithmJava {
             unSettledNodes.remove(node);
             findMinimalDistances(node);
         }
-        return System.currentTimeMillis() - startTime;
     }
 
     private void findMinimalDistances(City node) {

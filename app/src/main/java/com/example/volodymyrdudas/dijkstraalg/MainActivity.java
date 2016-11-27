@@ -14,14 +14,9 @@ import com.example.volodymyrdudas.dijkstraalg.db.DatabaseHelper;
 import com.example.volodymyrdudas.dijkstraalg.generator.Generator;
 import com.example.volodymyrdudas.dijkstraalg.model.City;
 import com.example.volodymyrdudas.dijkstraalg.model.Graph;
-import com.example.volodymyrdudas.dijkstraalg.model.Road;
 import com.example.volodymyrdudas.dijkstraalg.sqlimpl.DijkstraAlgorithmSQL;
 import com.example.volodymyrdudas.dijkstraalg.tests.DijkstraAlgorithmJava;
-import com.j256.ormlite.stmt.PreparedQuery;
-import com.j256.ormlite.stmt.QueryBuilder;
 
-import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
@@ -57,29 +52,16 @@ public class MainActivity extends AppCompatActivity {
 
     public void onClickJava(View view) {
         TextView infoTextView = (TextView) findViewById(R.id.javaResultTextView);
-        if (infoTextView != null)
+        if (infoTextView != null) {
             infoTextView.setText("");
-        List<City> cities = new ArrayList<>();
-        try {
-            QueryBuilder<City, Integer> queryBuilder = mDatabaseHelper.cityDAO.queryBuilder();
-            queryBuilder.orderBy(ConfigParams.CITY_TABLE_ID, true);
-            PreparedQuery<City> preparedQuery = queryBuilder.prepare();
-            cities = mDatabaseHelper.cityDAO.query(preparedQuery);
-            QueryBuilder<Road, Integer> queryBuilderRoad = mDatabaseHelper.roadDAO.queryBuilder();
-            PreparedQuery<Road> preparedQueryRoad;
-            for (City city : cities) {
-                preparedQueryRoad = queryBuilderRoad.where().eq("FromCity", city.getCityId()).or().eq("ToCity", city.getCityId()).prepare();
-                city.getRoads().addAll(mDatabaseHelper.roadDAO.query(preparedQueryRoad));
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        if (infoTextView != null)
             infoTextView.setText("Elapsed time is : ");
-        Graph graph = new Graph(cities);
-        DijkstraAlgorithmJava dijkstraAlgorithmJava = new DijkstraAlgorithmJava(graph);
+        }
+        long startTime = System.currentTimeMillis();
+        DijkstraAlgorithmJava dijkstraAlgorithmJava = new DijkstraAlgorithmJava();
+        List<City> cities = dijkstraAlgorithmJava.init(mDatabaseHelper);
         if (cities.size() > 0) {
-            long time = dijkstraAlgorithmJava.execute(cities.get(0));
+            dijkstraAlgorithmJava.execute(cities.get(0));
+            long time = System.currentTimeMillis() - startTime;
             if (infoTextView != null)
                 infoTextView.setText("Elapsed time is : " + String.valueOf(time / 1000.0) + " sec");
         } else {
@@ -94,8 +76,10 @@ public class MainActivity extends AppCompatActivity {
             infoTextView.setText("");
         }
         if (currentDBContentCountCities > 0) {
+            long startTime = System.currentTimeMillis();
             DijkstraAlgorithmSQL dijkstraAlgorithmSQL = new DijkstraAlgorithmSQL(mSqLiteDatabase);
-            long time = dijkstraAlgorithmSQL.execute(1);
+            dijkstraAlgorithmSQL.execute(1);
+            long time = System.currentTimeMillis() - startTime;
             if (infoTextView != null) {
                 infoTextView.setText("Elapsed time is : " + String.valueOf(time / 1000.0) + " sec");
             }

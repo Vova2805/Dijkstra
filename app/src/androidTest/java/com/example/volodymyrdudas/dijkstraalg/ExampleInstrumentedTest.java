@@ -33,6 +33,8 @@ public class ExampleInstrumentedTest {
     @Before
     public void init() {
         appContext = InstrumentationRegistry.getTargetContext();
+        mDatabaseHelper = new DatabaseHelper(appContext);
+        mSqLiteDatabase = mDatabaseHelper.getWritableDatabase();
         cities = new ArrayList<>();
         roads = new ArrayList<>();
 
@@ -110,17 +112,15 @@ public class ExampleInstrumentedTest {
 
     @Test
     public void JAVA_execute() throws Exception {
-        Graph graph = new Graph(cities);
-        DijkstraAlgorithmJava dijkstraAlgorithmJava = new DijkstraAlgorithmJava(graph);
-        long time = dijkstraAlgorithmJava.execute(cities.get(0));
+        long startTime = System.currentTimeMillis();
+        DijkstraAlgorithmJava dijkstraAlgorithmJava = new DijkstraAlgorithmJava();
+        dijkstraAlgorithmJava.execute(cities.get(0));
+        long time = System.currentTimeMillis() - startTime;
         System.out.println(time);
     }
 
     @Test
     public void SQL_execute() throws Exception {
-        mDatabaseHelper = new DatabaseHelper(appContext);
-        mSqLiteDatabase = mDatabaseHelper.getWritableDatabase();
-        mSqLiteDatabase.execSQL("DROP TABLE CityList;");
         mSqLiteDatabase.execSQL("DELETE FROM City;");
         mSqLiteDatabase.execSQL("DELETE FROM Road;");
         for (City city : cities) {
@@ -129,8 +129,10 @@ public class ExampleInstrumentedTest {
         for (Road road : roads) {
             mDatabaseHelper.roadDAO.create(road);
         }
+        long startTime = System.currentTimeMillis();
         DijkstraAlgorithmSQL dijkstraAlgorithmSQL = new DijkstraAlgorithmSQL(mSqLiteDatabase);
-        long time = dijkstraAlgorithmSQL.execute(1);
+        dijkstraAlgorithmSQL.execute(1);
+        long time = System.currentTimeMillis() - startTime;
         System.out.println(time);
     }
 }

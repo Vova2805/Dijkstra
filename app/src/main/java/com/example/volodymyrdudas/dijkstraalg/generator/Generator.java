@@ -61,10 +61,10 @@ public final class Generator {
                 values.put(ROAD_TO_CITY, toCity);
                 values.put(ROAD_DISTANCE, String.valueOf(random.nextInt(1000) / 10.0));
                 mSqLiteDatabase.insert(ROAD_TABLE, null, values);
-                values.put(ROAD_TABLE_ID, (id++) + maxId);
-                values.put(ROAD_FROM_CITY, toCity);
-                values.put(ROAD_TO_CITY, fromCity);
-                mSqLiteDatabase.insert(ROAD_TABLE, null, values);
+//                values.put(ROAD_TABLE_ID, (id++) + maxId);
+//                values.put(ROAD_FROM_CITY, toCity);
+//                values.put(ROAD_TO_CITY, fromCity);
+//                mSqLiteDatabase.insert(ROAD_TABLE, null, values);
             }
         }
         cursor.close();

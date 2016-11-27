@@ -10,7 +10,9 @@ public class DijkstraAlgorithmSQL {
         this.mSqLiteDatabase = mSqLiteDatabase;
     }
 
-    public long execute(int startSity) {
+    public void execute(int startSity) {
+        mSqLiteDatabase.execSQL("DROP TABLE IF EXISTS CityList;");
+        StringBuffer stringBuffer = new StringBuffer();
         mSqLiteDatabase.execSQL("CREATE TABLE CityList" +
                 "(" +
                 "CityId INTEGER NOT NULL," +
@@ -20,7 +22,6 @@ public class DijkstraAlgorithmSQL {
                 ")");
         mSqLiteDatabase.execSQL("INSERT INTO CityList (CityId, Estimate, Predecessor, Done)" +
                 "SELECT CityId, 2147483647, NULL, 0 FROM City;");
-        long startTime = System.currentTimeMillis();
         mSqLiteDatabase.execSQL("UPDATE CityList SET Estimate = 0 WHERE CityID = " + startSity);
         Cursor cursor;
         Integer fromCity;
@@ -35,20 +36,25 @@ public class DijkstraAlgorithmSQL {
             if (fromCity == null) {
                 break;
             }
-            mSqLiteDatabase.execSQL(
-                    " UPDATE CityList SET Done = 1 WHERE CityId = " + fromCity + ";");
-            mSqLiteDatabase.execSQL(
-                    " UPDATE CityList SET Estimate = " + currentEstimate + " + " +
-                            "(SELECT Distance FROM Road WHERE ToCity = CityId and FromCity = " + fromCity + " LIMIT 1)," +
-                            " Predecessor = " + fromCity +
-                            " WHERE CityId IN " +
-                            " (SELECT ToCity FROM Road WHERE FromCity = " + fromCity + " AND (" + currentEstimate + " + Distance) < Estimate);");
+            mSqLiteDatabase.execSQL(" UPDATE CityList SET Done = 1 WHERE CityId = " + fromCity);
+            stringBuffer.setLength(0);
+            stringBuffer.append(" UPDATE CityList SET Estimate = ")
+                    .append(currentEstimate)
+                    .append(" + ")
+                    .append("(SELECT Distance FROM Road WHERE ToCity = CityId and FromCity = ")
+                    .append(fromCity)
+                    .append(" LIMIT 1), Predecessor = ")
+                    .append(fromCity)
+                    .append(" WHERE CityId IN (SELECT ToCity FROM Road WHERE FromCity = ")
+                    .append(fromCity)
+                    .append(" AND (")
+                    .append(currentEstimate)
+                    .append(" + Distance) < Estimate);");
+            mSqLiteDatabase.execSQL(stringBuffer.toString());
             cursor.close();
         }
         cursor.close();
-        long time = System.currentTimeMillis() - startTime;
         mSqLiteDatabase.execSQL("DROP TABLE CityList;");
-        return time;
     }
 
     //for debugging
