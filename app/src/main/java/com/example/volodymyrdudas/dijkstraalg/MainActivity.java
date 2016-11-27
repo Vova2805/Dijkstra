@@ -13,9 +13,8 @@ import com.example.volodymyrdudas.dijkstraalg.config.ConfigParams;
 import com.example.volodymyrdudas.dijkstraalg.db.DatabaseHelper;
 import com.example.volodymyrdudas.dijkstraalg.generator.Generator;
 import com.example.volodymyrdudas.dijkstraalg.model.City;
-import com.example.volodymyrdudas.dijkstraalg.model.Graph;
-import com.example.volodymyrdudas.dijkstraalg.sqlimpl.DijkstraAlgorithmSQL;
-import com.example.volodymyrdudas.dijkstraalg.tests.DijkstraAlgorithmJava;
+import com.example.volodymyrdudas.dijkstraalg.implAlgorithm.DijkstraAlgorithmSQL;
+import com.example.volodymyrdudas.dijkstraalg.implAlgorithm.DijkstraAlgorithmJava;
 
 import java.util.List;
 

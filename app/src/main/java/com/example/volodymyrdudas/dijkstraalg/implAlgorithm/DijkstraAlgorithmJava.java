@@ -1,4 +1,4 @@
-package com.example.volodymyrdudas.dijkstraalg.tests;
+package com.example.volodymyrdudas.dijkstraalg.implAlgorithm;
 
 import com.example.volodymyrdudas.dijkstraalg.config.ConfigParams;
 import com.example.volodymyrdudas.dijkstraalg.db.DatabaseHelper;

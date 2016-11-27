@@ -1,4 +1,4 @@
-package com.example.volodymyrdudas.dijkstraalg.sqlimpl;
+package com.example.volodymyrdudas.dijkstraalg.implAlgorithm;
 
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;

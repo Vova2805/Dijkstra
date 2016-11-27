@@ -7,10 +7,9 @@ import android.support.test.runner.AndroidJUnit4;
 
 import com.example.volodymyrdudas.dijkstraalg.db.DatabaseHelper;
 import com.example.volodymyrdudas.dijkstraalg.model.City;
-import com.example.volodymyrdudas.dijkstraalg.model.Graph;
 import com.example.volodymyrdudas.dijkstraalg.model.Road;
-import com.example.volodymyrdudas.dijkstraalg.sqlimpl.DijkstraAlgorithmSQL;
-import com.example.volodymyrdudas.dijkstraalg.tests.DijkstraAlgorithmJava;
+import com.example.volodymyrdudas.dijkstraalg.implAlgorithm.DijkstraAlgorithmSQL;
+import com.example.volodymyrdudas.dijkstraalg.implAlgorithm.DijkstraAlgorithmJava;
 
 import org.junit.After;
 import org.junit.Before;
